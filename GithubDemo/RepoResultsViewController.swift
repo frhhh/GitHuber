@@ -10,8 +10,9 @@ import UIKit
 import MBProgressHUD
 
 // Main ViewController
-class RepoResultsViewController: UIViewController {
+class RepoResultsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
+    @IBOutlet weak var tableView: UITableView!
     var searchBar: UISearchBar!
     var searchSettings = GithubRepoSearchSettings()
 
@@ -19,7 +20,7 @@ class RepoResultsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Initialize the UISearchBar
         searchBar = UISearchBar()
         searchBar.delegate = self
@@ -27,27 +28,64 @@ class RepoResultsViewController: UIViewController {
         // Add SearchBar to the NavigationBar
         searchBar.sizeToFit()
         navigationItem.titleView = searchBar
+        
+        //Initialize tableViewer Implement UITableViewDataSource to use repos as the data source
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 100
+        
 
         // Perform the first search when the view controller first loads
         doSearch()
+        tableView.reloadData()
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "RepoCell") as! RepoCell
+        
+        let repo = repos[indexPath.row]
+        cell.lbname.text = repo.name
+        cell.lbstars.text = "\(repo.stars!)"
+        cell.lbforks.text = "\(repo.forks!)"
+        cell.lbownername.text = repo.ownerHandle
+        cell.lbdes.text = repo.description
+        
+        let url = NSURL(string: repo.ownerAvatarURL!)
+        cell.lbavatar.setImageWith(url as! URL)
+        
+        
+        return cell
     }
 
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+
+        if let repo = repos {
+            return repo.count
+        }
+        else    {
+            return 0
+        }
+    }
+    
     // Perform the search.
     fileprivate func doSearch() {
 
         MBProgressHUD.showAdded(to: self.view, animated: true)
-
+        
         // Perform request to GitHub API to get the list of repositories
         GithubRepo.fetchRepos(searchSettings, successCallback: { (newRepos) -> Void in
 
             // Print the returned repositories to the output window
             for repo in newRepos {
                 print(repo)
+                //lf.repos.append(repo)
             }   
-
+            self.tableView.reloadData()
             MBProgressHUD.hide(for: self.view, animated: true)
             }, error: { (error) -> Void in
-                print(error)
+                print(error!)
         })
     }
 }

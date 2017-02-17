@@ -21,6 +21,7 @@ class GithubRepo: CustomStringConvertible {
     var ownerAvatarURL: String?
     var stars: Int?
     var forks: Int?
+    var des: String?
     
     // Initializes a GitHubRepo from a JSON dictionary
     init(jsonResult: NSDictionary) {
@@ -44,6 +45,11 @@ class GithubRepo: CustomStringConvertible {
                 self.ownerAvatarURL = ownerAvatarURL
             }
         }
+        
+        if let des = jsonResult["description"] as? String {
+            self.des = des
+        }
+        
     }
     
     // Actually fetch the list of repositories from the GitHub API.
@@ -98,6 +104,7 @@ class GithubRepo: CustomStringConvertible {
             "\n\t[Stars: \(self.stars!)]" +
             "\n\t[Forks: \(self.forks!)]" +
             "\n\t[Owner: \(self.ownerHandle!)]" +
-            "\n\t[Avatar: \(self.ownerAvatarURL!)]"
+            "\n\t[Avatar: \(self.ownerAvatarURL!)]" +
+            "\n\t[Description: \(self.des!)]"
     }
 }
