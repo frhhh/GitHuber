@@ -11,6 +11,7 @@ import UIKit
 class RepoCell: UITableViewCell {
     
     
+    @IBOutlet weak var by: UILabel!
     @IBOutlet weak var lbname: UILabel!
 
     @IBOutlet weak var lbstars: UILabel!

@@ -13,10 +13,11 @@ import MBProgressHUD
 class RepoResultsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    
     var searchBar: UISearchBar!
     var searchSettings = GithubRepoSearchSettings()
 
-    var repos: [GithubRepo]!
+    var repos: [GithubRepo]! = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,31 +30,32 @@ class RepoResultsViewController: UIViewController, UITableViewDataSource, UITabl
         searchBar.sizeToFit()
         navigationItem.titleView = searchBar
         
-        //Initialize tableViewer Implement UITableViewDataSource to use repos as the data source
+        // Initialize tableViewer
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = UITableViewAutomaticDimension
-        tableView.estimatedRowHeight = 100
+        //tableView.rowHeight = UITableViewAutomaticDimension
+        //tableView.estimatedRowHeight = 100
         
 
         // Perform the first search when the view controller first loads
         doSearch()
-        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "RepoCell") as! RepoCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "RepoCell", for: indexPath) as! RepoCell
         
         let repo = repos[indexPath.row]
+        
+        cell.by.text = "by"
         cell.lbname.text = repo.name
         cell.lbstars.text = "\(repo.stars!)"
         cell.lbforks.text = "\(repo.forks!)"
         cell.lbownername.text = repo.ownerHandle
-        cell.lbdes.text = repo.description
+        cell.lbdes.text = repo.des
         
-        let url = NSURL(string: repo.ownerAvatarURL!)
-        cell.lbavatar.setImageWith(url as! URL)
+        let url = URL(string: repo.ownerAvatarURL!)
+        cell.lbavatar.setImageWith(url!)
         
         
         return cell
@@ -80,10 +82,12 @@ class RepoResultsViewController: UIViewController, UITableViewDataSource, UITabl
             // Print the returned repositories to the output window
             for repo in newRepos {
                 print(repo)
-                //lf.repos.append(repo)
-            }   
+            }
+            self.repos = newRepos
             self.tableView.reloadData()
+            
             MBProgressHUD.hide(for: self.view, animated: true)
+            
             }, error: { (error) -> Void in
                 print(error!)
         })
